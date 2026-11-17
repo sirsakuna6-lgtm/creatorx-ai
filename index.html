@@ -1,0 +1,188 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#090b13">
+<title>CreatorX AI</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#090b13;color:#f5f6ff;font-family:Inter,Arial,sans-serif}
+header{padding:22px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #25283a}
+.logo{font-size:23px;font-weight:800;letter-spacing:-1px}
+.logo span{color:#9b83ff}
+.pill{font-size:11px;color:#b7a8ff;background:#211b39;padding:7px 11px;border-radius:20px}
+main{padding:22px 16px 95px;max-width:850px;margin:auto}
+h1{font-size:27px;margin:12px 0 8px}
+.sub{color:#9699ad;font-size:13px;line-height:1.6}
+.card{background:linear-gradient(145deg,#171b2b,#10131f);border:1px solid #292d43;border-radius:18px;padding:17px;margin-top:18px}
+.card h3{margin:0 0 10px;font-size:16px}
+input{width:100%;padding:15px;border-radius:12px;border:1px solid #353950;background:#0b0e18;color:white;font-size:14px;outline:none}
+button{border:0;border-radius:12px;padding:13px 17px;background:#8466ff;color:white;font-weight:700;font-size:14px;cursor:pointer}
+button:active{opacity:.8}
+.primary{width:100%;margin-top:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:15px}
+.stat{background:#171b2b;border:1px solid #292d43;padding:16px;border-radius:15px}
+.stat small{color:#9699ad}
+.stat strong{display:block;font-size:23px;margin-top:9px}
+.icon{font-size:21px;margin-bottom:9px}
+.muted{color:#9699ad;font-size:12px;line-height:1.6}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#10131ff2;border-top:1px solid #292d43;display:flex;justify-content:space-around;padding:12px 4px calc(12px + env(safe-area-inset-bottom));z-index:5}
+.nav button{background:none;color:#999bb0;font-size:11px;padding:6px}
+.nav button.active{color:#b5a3ff}
+.nav span{display:block;font-size:19px;margin-bottom:4px}
+.result{display:none}
+.result img{width:100%;border-radius:12px;margin-top:12px}
+.result a{color:#b7a8ff;word-break:break-all}
+.item{padding:12px 0;border-bottom:1px solid #292d43;font-size:13px}
+.hidden{display:none}
+@media(min-width:650px){.grid{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+
+<header>
+ <div class="logo">CreatorX <span>AI.</span></div>
+ <div class="pill">FREE CREATOR TOOLKIT</div>
+</header>
+
+<main>
+<section id="home">
+ <p class="sub">YOUR PERSONAL CREATOR INTELLIGENCE</p>
+ <h1>Grow smarter. Create better.</h1>
+ <p class="sub">Research YouTube videos, discover opportunities and build your next viral idea.</p>
+
+ <div class="card">
+  <h3>🔎 YouTube Video Analyzer</h3>
+  <p class="muted">Paste a public YouTube video or Shorts link.</p>
+  <input id="videoUrl" placeholder="https://www.youtube.com/watch?v=...">
+  <button class="primary" onclick="analyze()">Analyze video →</button>
+  <div id="result" class="result">
+   <img id="thumbnail" alt="Video thumbnail">
+   <p id="videoId" class="muted"></p>
+   <a id="videoLink" target="_blank" rel="noopener">Open original video ↗</a>
+   <p class="muted">This preview verifies the video link. Live statistics and SEO analysis will be added in the next development phases.</p>
+  </div>
+  <p id="error" class="muted"></p>
+ </div>
+
+ <h3 style="margin-top:26px">Your Creator Toolkit</h3>
+ <div class="grid">
+  <div class="stat"><div class="icon">📊</div><small>Analytics</small><strong>01</strong></div>
+  <div class="stat"><div class="icon">🔍</div><small>Keyword research</small><strong>02</strong></div>
+  <div class="stat"><div class="icon">🚀</div><small>Viral finder</small><strong>03</strong></div>
+  <div class="stat"><div class="icon">🧠</div><small>AI Studio</small><strong>04</strong></div>
+ </div>
+ <div class="card">
+  <h3>✨ What's coming next?</h3>
+  <p class="muted">Channel research • Competitor tracking • Keyword explorer • SEO scoring • AI script generation • Thumbnail analysis.</p>
+ </div>
+</section>
+
+<section id="saved" class="hidden">
+ <h1>Saved Research</h1>
+ <p class="sub">Your recently analyzed YouTube links.</p>
+ <div class="card" id="savedList"></div>
+ <button onclick="clearSaved()" style="margin-top:14px;background:#343047">Clear history</button>
+</section>
+
+<section id="tools" class="hidden">
+ <h1>Creator Tools</h1>
+ <div class="card">
+  <h3>✍️ Title Idea Generator</h3>
+  <input id="topic" placeholder="Enter your video topic">
+  <button class="primary" onclick="makeTitles()">Generate ideas</button>
+  <div id="ideas" class="muted" style="margin-top:15px"></div>
+ </div>
+ <div class="card">
+  <h3>🎯 Video Description Helper</h3>
+  <p class="muted">More creator tools will be added as we build the platform.</p>
+ </div>
+</section>
+
+</main>
+
+<nav class="nav">
+ <button class="active" onclick="show('home',this)"><span>⌂</span>Home</button>
+ <button onclick="show('saved',this)"><span>▤</span>Saved</button>
+ <button onclick="show('tools',this)"><span>✦</span>Tools</button>
+</nav>
+
+<script>
+function getVideoId(url){
+ try{
+  const u=new URL(url);
+  if(u.hostname==="youtu.be") return u.pathname.split("/")[1];
+  if(u.hostname.endsWith("youtube.com")){
+   if(u.pathname==="/watch") return u.searchParams.get("v");
+   const match=u.pathname.match(/^\/(shorts|embed|live)\/([^/?]+)/);
+   if(match) return match[2];
+  }
+ }catch(e){}
+ return null;
+}
+
+function analyze(){
+ const url=document.getElementById("videoUrl").value.trim();
+ const id=getVideoId(url);
+ const result=document.getElementById("result");
+ const error=document.getElementById("error");
+ error.textContent="";
+ result.style.display="none";
+ if(!id){
+  error.textContent="Please enter a valid YouTube video or Shorts link.";
+  return;
+ }
+ document.getElementById("thumbnail").src=
+  "https://img.youtube.com/vi/"+encodeURIComponent(id)+"/hqdefault.jpg";
+ document.getElementById("videoId").textContent="Video ID: "+id;
+ document.getElementById("videoLink").href=
+  "https://www.youtube.com/watch?v="+encodeURIComponent(id);
+ result.style.display="block";
+ let history=JSON.parse(localStorage.getItem("creatorxHistory")||"[]");
+ history=history.filter(x=>x.id!==id);
+ history.unshift({id:id,url:url});
+ localStorage.setItem("creatorxHistory",JSON.stringify(history.slice(0,20)));
+}
+
+function show(page,button){
+ ["home","saved","tools"].forEach(id=>{
+  document.getElementById(id).classList.toggle("hidden",id!==page);
+ });
+ document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
+ button.classList.add("active");
+ if(page==="saved") renderSaved();
+}
+
+function renderSaved(){
+ const history=JSON.parse(localStorage.getItem("creatorxHistory")||"[]");
+ document.getElementById("savedList").innerHTML=
+ history.length?history.map(x=>
+ '<div class="item">▶ Video: '+x.id+
+ '<br><a style="color:#b7a8ff" href="https://www.youtube.com/watch?v='+x.id+
+ '" target="_blank" rel="noopener">Open video ↗</a></div>'
+ ).join(""):"<p class='muted'>No saved research yet.</p>";
+}
+
+function clearSaved(){
+ localStorage.removeItem("creatorxHistory");
+ renderSaved();
+}
+
+function makeTitles(){
+ const topic=document.getElementById("topic").value.trim();
+ if(!topic){document.getElementById("ideas").textContent="Enter a topic first.";return;}
+ const titles=[
+ "The Truth About "+topic+" Nobody Tells You",
+ "5 Things You Must Know About "+topic,
+ "Why Is Everyone Talking About "+topic+"?",
+ "The Hidden Secrets of "+topic,
+ "What Happens When You Discover "+topic+"?"
+ ];
+ document.getElementById("ideas").innerHTML=
+ titles.map((t,i)=>'<div class="item">'+(i+1)+'. '+t+'</div>').join("");
+}
+</script>
+</body>
+</html>
